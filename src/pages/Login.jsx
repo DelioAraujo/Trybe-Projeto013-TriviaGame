@@ -25,8 +25,16 @@ class Login extends React.Component {
     });
   };
 
-  login = () => {
+  login = async () => {
     const { history, dispatch } = this.props;
+    // faz a requisição
+    const response = await fetch('https://opentdb.com/api_token.php?command=request');
+    const data = await response.json();
+    // coloca em constantes cada uma das chavez que vem na resposta da api.
+    const { token } = data;
+    // manda o valor do token para o localStorage
+    localStorage.setItem('token', token);
+    // após a requisção. faz o redirecionamento para a rota do jogo (ainda não sei qual é.coloquei /jogo)
     dispatch(loginPlayer(this.state));
     history.push('/game');
   };
