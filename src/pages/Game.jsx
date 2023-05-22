@@ -8,7 +8,7 @@ class Game extends Component {
     time: 30,
     timeOutID: null,
     respondeu: false,
-    resposta:''
+    resposta: '',
   };
 
   componentDidMount() {
@@ -24,7 +24,7 @@ class Game extends Component {
       } else if (time === 0) {
         this.stopTimer();
         this.setState({
-          resposta: 'errada'
+          resposta: 'errada',
         });
       }
     }, seconds);
@@ -50,6 +50,8 @@ class Game extends Component {
           alt={ `Avatar de ${name}` }
         />
         <p data-testid="header-score">{ score }</p>
+
+        <button type="button" disabled={ time === 0 }>resposta</button>
       </div>
     );
   }
