@@ -17,6 +17,7 @@ class Game extends Component {
     this.startTimer();
     this.requestQuestions();
   }
+
   requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
@@ -36,34 +37,12 @@ class Game extends Component {
         return question;
       });
 
-      return this.setState({ questions, resposta: '', time: 30 });
+      return this.setState({ questions, resposta: '', time: 30, clicked: false });
     } catch (error) {
       console.error('Faça login novamente!', error);
       localStorage.clear();
       return history.push('/');
     }
-  };
-
-
-  startTimer = () => {
-    const seconds = 1000;
-    const timeOutID = setInterval(() => {
-      const { time } = this.state;
-      if (time > 0) {
-        this.setState((prevState) => ({ time: prevState.time - 1 }));
-      } else if (time === 0) {
-        this.stopTimer();
-        this.setState({
-          resposta: 'errada',
-        });
-      }
-    }, seconds);
-    this.setState({ timeOutID });
-  };
-
-  stopTimer = () => {
-    const { timeOutID } = this.state;
-    clearInterval(timeOutID);
   };
 
   respondedQuestion = (option) => {
@@ -89,7 +68,7 @@ class Game extends Component {
     } else {
       this.setState({ resposta: 'errada', clicked: true });
     }
-  }
+  };
 
   nextButtonClick = () => {
     this.requestQuestions();
@@ -158,7 +137,6 @@ class Game extends Component {
         />
 
         <p data-testid="header-score">{ score }</p>
-        <button type="button" disabled={ time === 0 }>resposta</button>
         <p data-testid="header-score">{`Score: ${score}`}</p>
 
         <div>
@@ -173,7 +151,7 @@ class Game extends Component {
                       key={ optionIndex }
                       data-testid="correct-answer"
                       onClick={ () => this.respondedQuestion(option) }
-                      disabled={ resposta.length > 0 }
+                      disabled={ time === 0 }
                       style={ resposta.length > 0
                         ? { border: '3px solid rgb(6, 240, 15)' }
                         : null }
@@ -187,7 +165,7 @@ class Game extends Component {
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
                     onClick={ () => this.respondedQuestion(option) }
-                    disabled={ resposta.length > 0 }
+                    disabled={ time === 0 }
                     style={ resposta.length > 0 ? { border: '3px solid red' } : null }
                   >
                     {option}
