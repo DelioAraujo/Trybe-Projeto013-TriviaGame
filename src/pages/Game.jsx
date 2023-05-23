@@ -6,18 +6,20 @@ import PropTypes from 'prop-types';
 class Game extends Component {
   state = {
     time: 30,
-     timeOutID: null,
-     resposta: '',
-     questions: [],
-     clicked: false
-    
+    timeOutID: null,
+    // resposta: '',
+    questions: [],
+    clicked: false,
   };
 
-   async componentDidMount() {
-     this.startTimer();
+  async componentDidMount() {
+    this.startTimer();
+    this.fetchApi();
+  }
+
+  fetchApi = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
-
     try {
       const response = await fetch(`https://opentdb.com/api.php?amount=5&token=${token}`);
       const data = await response.json();
@@ -40,34 +42,50 @@ class Game extends Component {
       localStorage.clear();
       return history.push('/');
     }
-  }
+  };
 
   buttonClicked = () => {
     this.setState({
       clicked: true,
     });
   };
-  
-   startTimer = () => {
-     const seconds = 1000;
-     const timeOutID = setInterval(() => {
-       const { time } = this.state;
-         if (time > 0) {
-         this.setState((prevState) => ({ time: prevState.time - 1 }));
-       } else if (time === 0) {
-         this.stopTimer();
-          this.setState({
-            resposta: 'errada',
-         });
-       }
-     }, seconds);
-     this.setState({ timeOutID });
+
+  nextButtonClick = () => {
+    this.fetchApi();
+
+    this.setState({
+      time: 30,
+    });
+
+    this.startTimer();
   };
 
-   stopTimer = () => {
-     const { timeOutID } = this.state;
-     clearInterval(timeOutID);
-   };
+  renderButtonClick = () => {
+    const { clicked } = this.state;
+    if (clicked) {
+      return (
+        <button data-testid="btn-next" onClick={ this.nextButtonClick }>Next</button>
+      );
+    }
+  };
+
+  startTimer = () => {
+    const seconds = 1000;
+    const timeOutID = setInterval(() => {
+      const { time } = this.state;
+      if (time > 0) {
+        this.setState((prevState) => ({ time: prevState.time - 1 }));
+      } else if (time === 0) {
+        this.stopTimer();
+      }
+    }, seconds);
+    this.setState({ timeOutID });
+  };
+
+  stopTimer = () => {
+    const { timeOutID } = this.state;
+    clearInterval(timeOutID);
+  };
 
   shuffleArray(array) {
     const shuffledArray = [...array];
@@ -80,14 +98,12 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
+    const { time, questions } = this.state;
 
     if (questions.length === 0) {
-    const { time, questions, clicked } = this.state;
-    
-      if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
     }
-    
+
     const { category, question, options, correct_answer: correct } = questions[0];
 
     return (
@@ -99,7 +115,7 @@ class Game extends Component {
           src={ `https://www.gravatar.com/avatar/${md5(email).toString()}` }
           alt={ `Avatar de ${name}` }
         />
- 
+
         <p data-testid="header-score">{ score }</p>
         <button type="button" disabled={ time === 0 }>resposta</button>
         <p data-testid="header-score">{`Score: ${score}`}</p>
@@ -136,7 +152,7 @@ class Game extends Component {
             </div>
           </div>
 
-          {clicked ? <button data-testid="btn-next">Next</button> : ''}
+          {this.renderButtonClick()}
 
         </div>
       </div>
@@ -148,8 +164,6 @@ const mapStateToProps = (state) => ({
   state: state.user,
 });
 
-export default connect(mapStateToProps)(Game);
-
 Game.propTypes = {
   state: PropTypes.shape({
     name: PropTypes.string,
@@ -157,3 +171,5 @@ Game.propTypes = {
     score: PropTypes.number,
   }),
 }.isRequired;
+
+export default connect(mapStateToProps)(Game);
