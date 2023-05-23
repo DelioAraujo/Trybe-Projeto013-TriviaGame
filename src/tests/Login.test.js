@@ -1,83 +1,63 @@
-import React from 'react';
-import { screen } from '@testing-library/react';
-import App from '../App';
-import { renderWithRouterAndRedux } from './helpers/renderWithRouterAndRedux';
-import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import React from "react";
+import renderWithRouterAndRedux from "./helpers/renderWithRouterAndRedux";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import App from "../App";
 
-afterEach(() => jest.clearAllMocks());
-
-describe('4. Desenvolva testes para atingir 90% de cobertura da tela de Login', () => {
-  test('A rota para esta página deve ser /', () => {
-    const { history } = renderWithRouterAndRedux(<App />);
-    expect(history.location.pathname).toBe('/');
-  });
-
-  describe('Testar se os campos input/botão estão na tela', () => {
-    test('É renderizado um elemento para que o usuário insira seu e-mail e nome', () => {
-      renderWithRouterAndRedux(<App />);
-  
-      const email = screen.getByTestId('input-gravatar-email');
-      const name = screen.getByTestId('input-player-name');
-  
-      expect(email).toBeInTheDocument();
-      expect(name).toBeInTheDocument();
-    });
-  
-    test('É renderizado um botão com o texto Play e um botão com o texto Configurações', () => {
-      renderWithRouterAndRedux(<App />);
-  
-      const playBtn = screen.getByText('Play');
-      const settingsBtn = screen.getByText('Configurações');
-  
-      expect(playBtn).toBeInTheDocument();
-      expect(settingsBtn).toBeInTheDocument();
-    });
-  });
-
-  describe('Comportamento do botão Play', () => {
-    test('O botão play só é habilitado se ambos nome e email são inseridos pelo usuário', () => {
-      renderWithRouterAndRedux(<App />);
-  
-      const playBtn = screen.getByTestId('btn-play');
-      expect(playBtn).toBeDisabled();
-  
-      const email = screen.getByText('Email:');
-      userEvent.type(email, 'teste@hotmail.com');
-  
-      const name = screen.getByText('Nome:');
-      userEvent.type(name, 'Teste');
-  
-      expect(playBtn).not.toBeDisabled();
-    });
-
-    test('Ao clicar no botão o usuário é direcionado para a rota /game', async () => {
+describe("Testa a página de login", () => {
+    const EMAIL = "email@teste.com";    
+    const NOME = "Nome Teste";
+    test("testa se o botão, quando os inputs são preenchidos corretamente, direciona para a rota '/game' ", () => {
       const { history } = renderWithRouterAndRedux(<App />);
+      const inputEmail = screen.queryByTestId("input-gravatar-email");
+      const inputName = screen.queryByTestId("input-player-name");
+      const buttonPlay = screen.queryByTestId("btn-play");
+
+      userEvent.type(inputEmail, EMAIL);
+      userEvent.type(inputName, NOME);
+
+      userEvent.click(buttonPlay);
+
       expect(history.location.pathname).toBe('/game');
-
-      const email = screen.getByTestId('input-gravatar-email');
-      userEvent.type(email, 'test@hotmail.com');
-        
-      const name = screen.getByTestId('input-player-name');
-      userEvent.type(name, 'Test');
-
-      const playBtn = screen.getByTestId('btn-play');
-      expect(playBtn).toBeInTheDocument();
-
-      userEvent.click(screen.getByTestId('btn-play'));
-
-      await waitFor(() =>
-        expect(screen.getByTestId('header-player-name')).toBeInTheDocument()
-      );
-    });
   });
 
-  test('Ao clicar no botão Configurações o usuário é direcionado para a rota /settings', () => {
-    const { history } = renderWithRouterAndRedux(<App />);
-    
-    const settingsBtn = screen.getByText('Configurações');
-    userEvent.click(settingsBtn);
+    test("testa se a página contém todos os elementos input de email, input de nome", () => {
+        renderWithRouterAndRedux(<App />);
+        const inputEmail = screen.queryByTestId("input-gravatar-email");
+        const inputName = screen.queryByTestId("input-player-name");
 
-    expect(history.location.pathname).toBe('/settings');
+        expect(inputEmail).toBeInTheDocument();
+        expect(inputName).toBeInTheDocument();
+    });
+
+    test("testa se a página contém um botão de jogar habilitado quando o input de email e nome são preenchidos", () => {
+        renderWithRouterAndRedux(<App />);
+        const inputEmail = screen.queryByTestId("input-gravatar-email");
+        const inputName = screen.queryByTestId("input-player-name");
+        const buttonPlay = screen.queryByTestId("btn-play");
+
+        userEvent.type(inputEmail, EMAIL);
+
+        expect(buttonPlay).toBeDisabled();
+
+        userEvent.type(inputName, NOME);
+
+        expect(buttonPlay).not.toBeDisabled();
+
+    });
+
+    test("testa se a página contém um botão de jogar desabilitado e um botão configurações que quando clicado mostra um elemento de título", () => {
+      renderWithRouterAndRedux(<App />);
+      const buttonPlay = screen.queryByTestId("btn-play");
+
+      expect(buttonPlay).toBeInTheDocument();
+      expect(buttonPlay).toBeDisabled();
+
+      const buttonSettings = screen.queryByTestId("btn-settings");
+      userEvent.click(buttonSettings);
+
+      const titleSettings = screen.queryByTestId("settings-title");
+      expect(titleSettings).toBeInTheDocument();
+
   });
 });
