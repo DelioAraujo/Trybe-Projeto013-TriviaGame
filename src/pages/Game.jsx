@@ -10,17 +10,16 @@ class Game extends Component {
     timeOutID: null,
     resposta: '',
     questions: [],
+    clicked: false,
   };
 
   componentDidMount() {
     this.startTimer();
     this.requestQuestions();
   }
-
   requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
-
     try {
       const response = await fetch(`https://opentdb.com/api.php?amount=5&token=${token}`);
       const data = await response.json();
@@ -44,6 +43,7 @@ class Game extends Component {
       return history.push('/');
     }
   };
+
 
   startTimer = () => {
     const seconds = 1000;
@@ -84,14 +84,48 @@ class Game extends Component {
         score += time;
       }
 
-      this.setState({ resposta: 'correta' });
+      this.setState({ resposta: 'correta', clicked: true });
       dispatch(correctQuestion(score));
     } else {
-      this.setState({ resposta: 'errada' });
+      this.setState({ resposta: 'errada', clicked: true });
     }
+  }
 
+  nextButtonClick = () => {
     this.requestQuestions();
+
+    this.setState({
+      time: 30,
+    });
+
     this.startTimer();
+  };
+
+  renderButtonClick = () => {
+    const { clicked } = this.state;
+    if (clicked) {
+      return (
+        <button data-testid="btn-next" onClick={ this.nextButtonClick }>Next</button>
+      );
+    }
+  };
+
+  startTimer = () => {
+    const seconds = 1000;
+    const timeOutID = setInterval(() => {
+      const { time } = this.state;
+      if (time > 0) {
+        this.setState((prevState) => ({ time: prevState.time - 1 }));
+      } else if (time === 0) {
+        this.stopTimer();
+      }
+    }, seconds);
+    this.setState({ timeOutID });
+  };
+
+  stopTimer = () => {
+    const { timeOutID } = this.state;
+    clearInterval(timeOutID);
   };
 
   shuffleArray(array) {
@@ -162,6 +196,9 @@ class Game extends Component {
               })}
             </div>
           </div>
+
+          {this.renderButtonClick()}
+
         </div>
       </div>
     );
@@ -172,8 +209,6 @@ const mapStateToProps = (state) => ({
   state: state.player,
 });
 
-export default connect(mapStateToProps)(Game);
-
 Game.propTypes = {
   state: PropTypes.shape({
     name: PropTypes.string,
@@ -181,3 +216,5 @@ Game.propTypes = {
     score: PropTypes.number,
   }),
 }.isRequired;
+
+export default connect(mapStateToProps)(Game);
