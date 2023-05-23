@@ -4,12 +4,14 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 class Game extends Component {
-   state = {
-     time: 30,
+  state = {
+    time: 30,
      timeOutID: null,
      resposta: '',
      questions: [],
-   };
+     clicked: false
+    
+  };
 
    async componentDidMount() {
      this.startTimer();
@@ -40,6 +42,12 @@ class Game extends Component {
     }
   }
 
+  buttonClicked = () => {
+    this.setState({
+      clicked: true,
+    });
+  };
+  
    startTimer = () => {
      const seconds = 1000;
      const timeOutID = setInterval(() => {
@@ -72,7 +80,9 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { time, questions } = this.state;
+
+    if (questions.length === 0) {
+    const { time, questions, clicked } = this.state;
     
       if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
@@ -106,6 +116,7 @@ class Game extends Component {
                       key={ optionIndex }
                       data-testid="correct-answer"
                       style={ { border: '3px solid rgb(6, 240, 15' } }
+                      onClick={ this.buttonClicked }
                     >
                       {option}
                     </button>
@@ -116,6 +127,7 @@ class Game extends Component {
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
                     style={ { border: '3px solid red' } }
+                    onClick={ this.buttonClicked }
                   >
                     {option}
                   </button>
@@ -123,6 +135,9 @@ class Game extends Component {
               })}
             </div>
           </div>
+
+          {clicked ? <button data-testid="btn-next">Next</button> : ''}
+
         </div>
       </div>
     );
