@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 class Game extends Component {
   state = {
     questions: [],
+    clicked: false,
   };
 
   async componentDidMount() {
@@ -36,6 +37,12 @@ class Game extends Component {
     }
   }
 
+  buttonClicked = () => {
+    this.setState({
+      clicked: true,
+    });
+  };
+
   shuffleArray(array) {
     const shuffledArray = [...array];
     for (let i = shuffledArray.length - 1; i > 0; i -= 1) {
@@ -47,7 +54,7 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { questions } = this.state;
+    const { questions, clicked } = this.state;
 
     if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
@@ -77,6 +84,7 @@ class Game extends Component {
                       key={ optionIndex }
                       data-testid="correct-answer"
                       style={ { border: '3px solid rgb(6, 240, 15' } }
+                      onClick={ this.buttonClicked }
                     >
                       {option}
                     </button>
@@ -87,6 +95,7 @@ class Game extends Component {
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
                     style={ { border: '3px solid red' } }
+                    onClick={ this.buttonClicked }
                   >
                     {option}
                   </button>
@@ -94,6 +103,9 @@ class Game extends Component {
               })}
             </div>
           </div>
+
+          {clicked ? <button data-testid="btn-next">Next</button> : ''}
+
         </div>
       </div>
     );
