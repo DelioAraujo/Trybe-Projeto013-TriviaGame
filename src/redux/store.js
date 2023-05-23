@@ -9,6 +9,7 @@ const store = createStore(
     applyMiddleware(thunk),
   ),
 );
+
 if (window.Cypress) {
   window.store = store;
 }

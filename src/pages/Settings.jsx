@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class MenuConfig extends Component {
+export default class Settings extends Component {
   render() {
     return (
       <div>
