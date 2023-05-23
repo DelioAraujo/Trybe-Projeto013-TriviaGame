@@ -2,17 +2,22 @@ import React, { Component } from 'react';
 import md5 from 'crypto-js/md5';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { correctQuestion } from '../redux/actions';
 
 class Game extends Component {
-   state = {
-     time: 30,
-     timeOutID: null,
-     resposta: '',
-     questions: [],
-   };
+  state = {
+    time: 30,
+    timeOutID: null,
+    resposta: '',
+    questions: [],
+  };
 
-   async componentDidMount() {
-     this.startTimer();
+  componentDidMount() {
+    this.startTimer();
+    this.requestQuestions();
+  }
+
+  requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
 
@@ -32,34 +37,62 @@ class Game extends Component {
         return question;
       });
 
-      return this.setState({ questions });
+      return this.setState({ questions, resposta: '', time: 30 });
     } catch (error) {
       console.error('Faça login novamente!', error);
       localStorage.clear();
       return history.push('/');
     }
-  }
-
-   startTimer = () => {
-     const seconds = 1000;
-     const timeOutID = setInterval(() => {
-       const { time } = this.state;
-         if (time > 0) {
-         this.setState((prevState) => ({ time: prevState.time - 1 }));
-       } else if (time === 0) {
-         this.stopTimer();
-          this.setState({
-            resposta: 'errada',
-         });
-       }
-     }, seconds);
-     this.setState({ timeOutID });
   };
 
-   stopTimer = () => {
-     const { timeOutID } = this.state;
-     clearInterval(timeOutID);
-   };
+  startTimer = () => {
+    const seconds = 1000;
+    const timeOutID = setInterval(() => {
+      const { time } = this.state;
+      if (time > 0) {
+        this.setState((prevState) => ({ time: prevState.time - 1 }));
+      } else if (time === 0) {
+        this.stopTimer();
+        this.setState({
+          resposta: 'errada',
+        });
+      }
+    }, seconds);
+    this.setState({ timeOutID });
+  };
+
+  stopTimer = () => {
+    const { timeOutID } = this.state;
+    clearInterval(timeOutID);
+  };
+
+  respondedQuestion = (option) => {
+    const { questions, time } = this.state;
+    const { dispatch } = this.props;
+    const { correct_answer: correct, difficulty } = questions[0];
+
+    const minPoint = 10;
+    const hard = 3;
+    let score = minPoint;
+
+    if (option === correct) {
+      if (difficulty === 'hard') {
+        score += time * hard;
+      } else if (difficulty === 'medium') {
+        score += time * 2;
+      } else {
+        score += time;
+      }
+
+      this.setState({ resposta: 'correta' });
+      dispatch(correctQuestion(score));
+    } else {
+      this.setState({ resposta: 'errada' });
+    }
+
+    this.requestQuestions();
+    this.startTimer();
+  };
 
   shuffleArray(array) {
     const shuffledArray = [...array];
@@ -72,12 +105,12 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { time, questions } = this.state;
-    
-      if (questions.length === 0) {
+    const { time, questions, resposta } = this.state;
+
+    if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
     }
-    
+
     const { category, question, options, correct_answer: correct } = questions[0];
 
     return (
@@ -89,7 +122,7 @@ class Game extends Component {
           src={ `https://www.gravatar.com/avatar/${md5(email).toString()}` }
           alt={ `Avatar de ${name}` }
         />
- 
+
         <p data-testid="header-score">{ score }</p>
         <button type="button" disabled={ time === 0 }>resposta</button>
         <p data-testid="header-score">{`Score: ${score}`}</p>
@@ -105,7 +138,11 @@ class Game extends Component {
                     <button
                       key={ optionIndex }
                       data-testid="correct-answer"
-                      style={ { border: '3px solid rgb(6, 240, 15' } }
+                      onClick={ () => this.respondedQuestion(option) }
+                      disabled={ resposta.length > 0 }
+                      style={ resposta.length > 0
+                        ? { border: '3px solid rgb(6, 240, 15)' }
+                        : null }
                     >
                       {option}
                     </button>
@@ -115,7 +152,9 @@ class Game extends Component {
                   <button
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
-                    style={ { border: '3px solid red' } }
+                    onClick={ () => this.respondedQuestion(option) }
+                    disabled={ resposta.length > 0 }
+                    style={ resposta.length > 0 ? { border: '3px solid red' } : null }
                   >
                     {option}
                   </button>
@@ -130,7 +169,7 @@ class Game extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  state: state.user,
+  state: state.player,
 });
 
 export default connect(mapStateToProps)(Game);
