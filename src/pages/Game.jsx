@@ -76,6 +76,7 @@ class Game extends Component {
                     <button
                       key={ optionIndex }
                       data-testid="correct-answer"
+                      style={ { border: '3px solid rgb(6, 240, 15' } }
                     >
                       {option}
                     </button>
@@ -85,6 +86,7 @@ class Game extends Component {
                   <button
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
+                    style={ { border: '3px solid red' } }
                   >
                     {option}
                   </button>
