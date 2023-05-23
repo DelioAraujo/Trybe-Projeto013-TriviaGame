@@ -2,22 +2,22 @@ import React, { Component } from 'react';
 import md5 from 'crypto-js/md5';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { correctQuestion } from '../redux/actions';
 
 class Game extends Component {
   state = {
     time: 30,
     timeOutID: null,
-    // resposta: '',
+    resposta: '',
     questions: [],
     clicked: false,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     this.startTimer();
-    this.fetchApi();
+    this.requestQuestions();
   }
-
-  fetchApi = async () => {
+  requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
     try {
@@ -36,7 +36,7 @@ class Game extends Component {
         return question;
       });
 
-      return this.setState({ questions });
+      return this.setState({ questions, resposta: '', time: 30 });
     } catch (error) {
       console.error('Faça login novamente!', error);
       localStorage.clear();
@@ -44,14 +44,55 @@ class Game extends Component {
     }
   };
 
-  buttonClicked = () => {
-    this.setState({
-      clicked: true,
-    });
+
+  startTimer = () => {
+    const seconds = 1000;
+    const timeOutID = setInterval(() => {
+      const { time } = this.state;
+      if (time > 0) {
+        this.setState((prevState) => ({ time: prevState.time - 1 }));
+      } else if (time === 0) {
+        this.stopTimer();
+        this.setState({
+          resposta: 'errada',
+        });
+      }
+    }, seconds);
+    this.setState({ timeOutID });
   };
 
+  stopTimer = () => {
+    const { timeOutID } = this.state;
+    clearInterval(timeOutID);
+  };
+
+  respondedQuestion = (option) => {
+    const { questions, time } = this.state;
+    const { dispatch } = this.props;
+    const { correct_answer: correct, difficulty } = questions[0];
+
+    const minPoint = 10;
+    const hard = 3;
+    let score = minPoint;
+
+    if (option === correct) {
+      if (difficulty === 'hard') {
+        score += time * hard;
+      } else if (difficulty === 'medium') {
+        score += time * 2;
+      } else {
+        score += time;
+      }
+
+      this.setState({ resposta: 'correta', clicked: true });
+      dispatch(correctQuestion(score));
+    } else {
+      this.setState({ resposta: 'errada', clicked: true });
+    }
+  }
+
   nextButtonClick = () => {
-    this.fetchApi();
+    this.requestQuestions();
 
     this.setState({
       time: 30,
@@ -98,7 +139,7 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { time, questions } = this.state;
+    const { time, questions, resposta } = this.state;
 
     if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
@@ -131,8 +172,11 @@ class Game extends Component {
                     <button
                       key={ optionIndex }
                       data-testid="correct-answer"
-                      style={ { border: '3px solid rgb(6, 240, 15' } }
-                      onClick={ this.buttonClicked }
+                      onClick={ () => this.respondedQuestion(option) }
+                      disabled={ resposta.length > 0 }
+                      style={ resposta.length > 0
+                        ? { border: '3px solid rgb(6, 240, 15)' }
+                        : null }
                     >
                       {option}
                     </button>
@@ -142,8 +186,9 @@ class Game extends Component {
                   <button
                     key={ optionIndex }
                     data-testid={ `wrong-answer-${optionIndex}` }
-                    style={ { border: '3px solid red' } }
-                    onClick={ this.buttonClicked }
+                    onClick={ () => this.respondedQuestion(option) }
+                    disabled={ resposta.length > 0 }
+                    style={ resposta.length > 0 ? { border: '3px solid red' } : null }
                   >
                     {option}
                   </button>
@@ -161,7 +206,7 @@ class Game extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  state: state.user,
+  state: state.player,
 });
 
 Game.propTypes = {
