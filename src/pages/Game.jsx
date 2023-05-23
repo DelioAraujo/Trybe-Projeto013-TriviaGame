@@ -7,8 +7,7 @@ class Game extends Component {
   state = {
     time: 30,
     timeOutID: null,
-    respondeu: false,
-    resposta: '',
+    // resposta: '',
   };
 
   componentDidMount() {
@@ -24,7 +23,7 @@ class Game extends Component {
       } else if (time === 0) {
         this.stopTimer();
         this.setState({
-          resposta: 'errada',
+          // resposta: 'errada',
         });
       }
     }, seconds);
