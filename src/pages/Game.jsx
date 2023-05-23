@@ -4,40 +4,81 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 class Game extends Component {
-  // state = {
-  //   time: 30,
-  //   timeOutID: null,
-  //   // resposta: '',
-  // };
+   state = {
+     time: 30,
+     timeOutID: null,
+     resposta: '',
+     questions: [],
+   };
 
-  // componentDidMount() {
-  //   this.startTimer();
-  // }
+   async componentDidMount() {
+     this.startTimer();
+    const { history } = this.props;
+    const token = localStorage.getItem('token');
 
-  // startTimer = () => {
-  //   const seconds = 1000;
-  //   const timeOutID = setInterval(() => {
-  //     const { time } = this.state;
-  //     if (time > 0) {
-  //       this.setState((prevState) => ({ time: prevState.time - 1 }));
-  //     } else if (time === 0) {
-  //       this.stopTimer();
-  //       this.setState({
-  //         // resposta: 'errada',
-  //       });
-  //     }
-  //   }, seconds);
-  //   this.setState({ timeOutID });
-  // };
+    try {
+      const response = await fetch(`https://opentdb.com/api.php?amount=5&token=${token}`);
+      const data = await response.json();
 
-  // stopTimer = () => {
-  //   const { timeOutID } = this.state;
-  //   clearInterval(timeOutID);
-  // };
+      if (data.results.length === 0) {
+        localStorage.clear();
+        return history.push('/');
+      }
+
+      const questions = data.results.map((question) => {
+        const options = [question.correct_answer, ...question.incorrect_answers];
+        const shuffledOptions = this.shuffleArray(options);
+        question.options = shuffledOptions;
+        return question;
+      });
+
+      return this.setState({ questions });
+    } catch (error) {
+      console.error('Faça login novamente!', error);
+      localStorage.clear();
+      return history.push('/');
+    }
+  }
+
+   startTimer = () => {
+     const seconds = 1000;
+     const timeOutID = setInterval(() => {
+       const { time } = this.state;
+         if (time > 0) {
+         this.setState((prevState) => ({ time: prevState.time - 1 }));
+       } else if (time === 0) {
+         this.stopTimer();
+          this.setState({
+            resposta: 'errada',
+         });
+       }
+     }, seconds);
+     this.setState({ timeOutID });
+  };
+
+   stopTimer = () => {
+     const { timeOutID } = this.state;
+     clearInterval(timeOutID);
+   };
+
+  shuffleArray(array) {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  }
 
   render() {
     const { state: { name, email, score } } = this.props;
-    // const { time } = this.state;
+    const { time, questions } = this.state;
+    
+      if (questions.length === 0) {
+      return <div data-testid="loading">Loading...</div>;
+    }
+    
+    const { category, question, options, correct_answer: correct } = questions[0];
 
     return (
       <div>
@@ -48,9 +89,41 @@ class Game extends Component {
           src={ `https://www.gravatar.com/avatar/${md5(email).toString()}` }
           alt={ `Avatar de ${name}` }
         />
+ 
         <p data-testid="header-score">{ score }</p>
+        <button type="button" disabled={ time === 0 }>resposta</button>
+        <p data-testid="header-score">{`Score: ${score}`}</p>
 
-        {/* <button type="button" disabled={ time === 0 }>resposta</button> */}
+        <div>
+          <div>
+            <p data-testid="question-category">{category}</p>
+            <p data-testid="question-text">{question}</p>
+            <div data-testid="answer-options">
+              {options.map((option, optionIndex) => {
+                if (option === correct) {
+                  return (
+                    <button
+                      key={ optionIndex }
+                      data-testid="correct-answer"
+                      style={ { border: '3px solid rgb(6, 240, 15' } }
+                    >
+                      {option}
+                    </button>
+                  );
+                }
+                return (
+                  <button
+                    key={ optionIndex }
+                    data-testid={ `wrong-answer-${optionIndex}` }
+                    style={ { border: '3px solid red' } }
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

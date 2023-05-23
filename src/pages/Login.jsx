@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import validator from 'validator';
 import PropTypes from 'prop-types';
-import { loginPlayer } from '../redux/reducers/actions';
+import { loginPlayer } from '../redux/actions';
 
 class Login extends React.Component {
   state = {

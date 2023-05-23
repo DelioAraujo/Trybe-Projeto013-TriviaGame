@@ -1,4 +1,4 @@
-import { LOGIN_PLAYER } from './actions';
+import { LOGIN_PLAYER } from '../actions';
 
 // Esse reducer será responsável por tratar as informações da pessoa usuária
 const ESTADO_INICIAL = {
