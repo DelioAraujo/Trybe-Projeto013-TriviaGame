@@ -4,11 +4,15 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 class Game extends Component {
-  state = {
-    questions: [],
-  };
+   state = {
+     time: 30,
+     timeOutID: null,
+     resposta: '',
+     questions: [],
+   };
 
-  async componentDidMount() {
+   async componentDidMount() {
+     this.startTimer();
     const { history } = this.props;
     const token = localStorage.getItem('token');
 
@@ -36,6 +40,27 @@ class Game extends Component {
     }
   }
 
+   startTimer = () => {
+     const seconds = 1000;
+     const timeOutID = setInterval(() => {
+       const { time } = this.state;
+         if (time > 0) {
+         this.setState((prevState) => ({ time: prevState.time - 1 }));
+       } else if (time === 0) {
+         this.stopTimer();
+          this.setState({
+            resposta: 'errada',
+         });
+       }
+     }, seconds);
+     this.setState({ timeOutID });
+  };
+
+   stopTimer = () => {
+     const { timeOutID } = this.state;
+     clearInterval(timeOutID);
+   };
+
   shuffleArray(array) {
     const shuffledArray = [...array];
     for (let i = shuffledArray.length - 1; i > 0; i -= 1) {
@@ -47,22 +72,26 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { questions } = this.state;
-
-    if (questions.length === 0) {
+    const { time, questions } = this.state;
+    
+      if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
     }
-
+    
     const { category, question, options, correct_answer: correct } = questions[0];
 
     return (
       <div>
-        <h2 data-testid="header-player-name">{name}</h2>
+        <div>{time}</div>
+        <h2 data-testid="header-player-name">{ name }</h2>
         <img
           data-testid="header-profile-picture"
           src={ `https://www.gravatar.com/avatar/${md5(email).toString()}` }
           alt={ `Avatar de ${name}` }
         />
+ 
+        <p data-testid="header-score">{ score }</p>
+        <button type="button" disabled={ time === 0 }>resposta</button>
         <p data-testid="header-score">{`Score: ${score}`}</p>
 
         <div>
