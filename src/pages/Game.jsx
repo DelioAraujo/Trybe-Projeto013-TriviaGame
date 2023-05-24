@@ -1,8 +1,8 @@
-import md5 from 'crypto-js/md5';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { correctQuestion } from '../redux/actions';
+import Header from '../components/Header';
 
 class Game extends Component {
   state = {
@@ -121,7 +121,6 @@ class Game extends Component {
   }
 
   render() {
-    const { state: { name, email, score } } = this.props;
     const { time, questions, clicked, questionIndex } = this.state;
 
     if (questions.length === 0) {
@@ -134,17 +133,7 @@ class Game extends Component {
 
     return (
       <div>
-        <div>{time}</div>
-        <h2 data-testid="header-player-name">{ name }</h2>
-        <img
-          data-testid="header-profile-picture"
-          src={ `https://www.gravatar.com/avatar/${md5(email).toString()}` }
-          alt={ `Avatar de ${name}` }
-        />
-
-        <p data-testid="header-score">{ score }</p>
-        <p data-testid="header-score">{`Score: ${score}`}</p>
-
+        <Header />
         <div>
           <div>
             <p data-testid="question-category">{category}</p>
