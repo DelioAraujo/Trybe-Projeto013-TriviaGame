@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
 import md5 from 'crypto-js/md5';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { correctQuestion } from '../redux/actions';
 
 class Game extends Component {
@@ -77,7 +77,7 @@ class Game extends Component {
 
     if (questionIndex === maxQuestions) {
       this.setState({ questionIndex: 0, time: 30, clicked: false });
-      return history.push('/'); // altere aqui a rota da página de feedback
+      return history.push('/feedback'); // altere aqui a rota da página de feedback
     }
 
     this.setState({ questionIndex: questionIndex + 1, time: 30, clicked: false });
