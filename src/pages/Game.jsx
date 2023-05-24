@@ -8,9 +8,9 @@ class Game extends Component {
   state = {
     time: 30,
     timeOutID: null,
-    resposta: '',
     questions: [],
     clicked: false,
+    questionIndex: 0,
   };
 
   componentDidMount() {
@@ -37,7 +37,7 @@ class Game extends Component {
         return question;
       });
 
-      return this.setState({ questions, resposta: '', time: 30, clicked: false });
+      return this.setState({ questions, time: 30, clicked: false });
     } catch (error) {
       console.error('Faça login novamente!', error);
       localStorage.clear();
@@ -46,9 +46,9 @@ class Game extends Component {
   };
 
   respondedQuestion = (option) => {
-    const { questions, time } = this.state;
+    const { questions, time, questionIndex } = this.state;
     const { dispatch } = this.props;
-    const { correct_answer: correct, difficulty } = questions[0];
+    const { correct_answer: correct, difficulty } = questions[questionIndex];
 
     const minPoint = 10;
     const hard = 3;
@@ -63,20 +63,24 @@ class Game extends Component {
         score += time;
       }
 
-      this.setState({ resposta: 'correta', clicked: true });
+      this.setState({ clicked: true });
       dispatch(correctQuestion(score));
     } else {
-      this.setState({ resposta: 'errada', clicked: true });
+      this.setState({ clicked: true });
     }
   };
 
   nextButtonClick = () => {
-    this.requestQuestions();
+    const { questionIndex } = this.state;
+    const { history } = this.props;
+    const maxQuestions = 4;
 
-    this.setState({
-      time: 30,
-    });
+    if (questionIndex === maxQuestions) {
+      this.setState({ questionIndex: 0, time: 30, clicked: false });
+      return history.push('/'); // altere aqui a rota da página de feedback
+    }
 
+    this.setState({ questionIndex: questionIndex + 1, time: 30, clicked: false });
     this.startTimer();
   };
 
@@ -118,13 +122,15 @@ class Game extends Component {
 
   render() {
     const { state: { name, email, score } } = this.props;
-    const { time, questions, resposta } = this.state;
+    const { time, questions, clicked, questionIndex } = this.state;
 
     if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
     }
 
-    const { category, question, options, correct_answer: correct } = questions[0];
+    const {
+      category, question, options, correct_answer: correct,
+    } = questions[questionIndex];
 
     return (
       <div>
@@ -152,7 +158,7 @@ class Game extends Component {
                       data-testid="correct-answer"
                       onClick={ () => this.respondedQuestion(option) }
                       disabled={ time === 0 }
-                      style={ resposta.length > 0
+                      style={ clicked
                         ? { border: '3px solid rgb(6, 240, 15)' }
                         : null }
                     >
@@ -166,7 +172,7 @@ class Game extends Component {
                     data-testid={ `wrong-answer-${optionIndex}` }
                     onClick={ () => this.respondedQuestion(option) }
                     disabled={ time === 0 }
-                    style={ resposta.length > 0 ? { border: '3px solid red' } : null }
+                    style={ clicked ? { border: '3px solid red' } : null }
                   >
                     {option}
                   </button>
