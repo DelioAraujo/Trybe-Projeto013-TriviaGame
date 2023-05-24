@@ -141,14 +141,6 @@ class Game extends Component {
             <p data-testid="question-text">{question}</p>
             <div>
               <button
-                data-testid="btn-play-again"
-                onClick={ () => history.push('/') }
-              >
-                Play Again
-              </button>
-            </div>
-            <div>
-              <button
                 data-testid="btn-ranking"
                 onClick={ () => history.push('/ranking') }
               >
