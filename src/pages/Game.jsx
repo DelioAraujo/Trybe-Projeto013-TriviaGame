@@ -18,6 +18,11 @@ class Game extends Component {
     this.requestQuestions();
   }
 
+  playAgain = () => {
+    const { history } = this.props;
+    history.push('/');
+  };
+
   requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
@@ -138,6 +143,11 @@ class Game extends Component {
           <div>
             <p data-testid="question-category">{category}</p>
             <p data-testid="question-text">{question}</p>
+            <div>
+              <button data-testid="btn-play-again" onClick={ this.playAgain }>
+                Play Again
+              </button>
+            </div>
             <div data-testid="answer-options">
               {options.map((option, optionIndex) => {
                 if (option === correct) {
