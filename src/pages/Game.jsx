@@ -77,7 +77,7 @@ class Game extends Component {
 
     if (questionIndex === maxQuestions) {
       this.setState({ questionIndex: 0, time: 30, clicked: false });
-      return history.push('/rotadefeedback');
+      return history.push('/feedback'); // altere aqui a rota da página de feedback
     }
 
     this.setState({ questionIndex: questionIndex + 1, time: 30, clicked: false });
