@@ -32,6 +32,7 @@ class Feedback extends React.Component {
 
   render() {
     const { state: { score, assertions } } = this.props;
+    const { history } = this.props;
     const { messageFeedback } = this.state;
     return (
       <div>
@@ -40,6 +41,13 @@ class Feedback extends React.Component {
         <div data-testid="feedback-text">{messageFeedback}</div>
         <p data-testid="feedback-total-score">{score}</p>
         <p data-testid="feedback-total-question">{assertions}</p>
+
+        <button
+          data-testid="btn-ranking"
+          onClick={ () => history.push('/ranking') }
+        >
+          Ranking
+        </button>
       </div>
     );
   }
@@ -55,4 +63,5 @@ Feedback.propTypes = {
     assertions: PropTypes.number,
   }),
 }.isRequired;
+
 export default connect(mapStateToProps)(Feedback);

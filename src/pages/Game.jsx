@@ -18,11 +18,6 @@ class Game extends Component {
     this.requestQuestions();
   }
 
-  playAgain = () => {
-    const { history } = this.props;
-    history.push('/');
-  };
-
   requestQuestions = async () => {
     const { history } = this.props;
     const token = localStorage.getItem('token');
@@ -127,6 +122,7 @@ class Game extends Component {
 
   render() {
     const { time, questions, clicked, questionIndex } = this.state;
+    const { history } = this.props;
 
     if (questions.length === 0) {
       return <div data-testid="loading">Loading...</div>;
@@ -144,8 +140,19 @@ class Game extends Component {
             <p data-testid="question-category">{category}</p>
             <p data-testid="question-text">{question}</p>
             <div>
-              <button data-testid="btn-play-again" onClick={ this.playAgain }>
+              <button
+                data-testid="btn-play-again"
+                onClick={ () => history.push('/') }
+              >
                 Play Again
+              </button>
+            </div>
+            <div>
+              <button
+                data-testid="btn-ranking"
+                onClick={ () => history.push('/ranking') }
+              >
+                Ranking
               </button>
             </div>
             <div data-testid="answer-options">
