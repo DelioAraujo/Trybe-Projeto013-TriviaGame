@@ -50,13 +50,13 @@ class Feedback extends React.Component {
         </button>
 
         <div>
-              <button
-                data-testid="btn-play-again"
-                onClick={ () => history.push('/') }
-              >
-                Play Again
-              </button>
-            </div>
+          <button
+            data-testid="btn-play-again"
+            onClick={ () => history.push('/') }
+          >
+            Play Again
+          </button>
+        </div>
       </div>
     );
   }
