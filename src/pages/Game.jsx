@@ -135,6 +135,7 @@ class Game extends Component {
     return (
       <div>
         <Header />
+        <p>{ time }</p>
         <div>
           <div>
             <p data-testid="question-category">{category}</p>
